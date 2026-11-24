@@ -16,21 +16,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+      - name: Extract fresh project ZIP
+        run: |
+          if [ ! -f Freedom_AI_Trader_Fresh_Project.zip ]; then
+            echo "Project ZIP not found in repository root"
+            ls -la
+            exit 1
+          fi
+          unzip -o Freedom_AI_Trader_Fresh_Project.zip -d . \
+            -x ".github/*" "README-HINDI.txt"
 
-      - name: Check project files
+      - name: Verify project files
         run: |
           test -f package.json
           test -f app.json
           test -f App.tsx
           test -f src/market.ts
           test -f src/indicators.ts
+          echo "All project files found!"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -44,7 +55,7 @@ jobs:
       - name: Generate Android project
         run: npx expo prebuild --platform android --non-interactive
 
-      - name: Build APK
+      - name: Build Android APK
         working-directory: android
         run: |
           chmod +x gradlew
@@ -56,3 +67,4 @@ jobs:
           name: freedom-ai-trader-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 14
