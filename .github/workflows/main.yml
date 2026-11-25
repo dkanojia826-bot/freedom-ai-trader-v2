@@ -1,4 +1,3 @@
-
 name: Build Freedom AI Trader APK
 
 on:
@@ -57,3 +56,4 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
+          
