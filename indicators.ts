@@ -1,0 +1,2 @@
+export function ema(values:number[],period:number):number[]{if(period<1||!values.length)return[];const a=2/(period+1),out=[values[0]];for(let i=1;i<values.length;i++)out.push(values[i]*a+out[i-1]*(1-a));return out;}
+export function rsi(values:number[],period=14):number|null{if(period<1||values.length<=period)return null;let gains=0,losses=0;for(let i=values.length-period;i<values.length;i++){const d=values[i]-values[i-1];if(d>0)gains+=d;else losses-=d;}if(losses===0)return 100;const rs=gains/losses;return 100-100/(1+rs);}
