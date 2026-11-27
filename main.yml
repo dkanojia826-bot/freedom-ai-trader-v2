@@ -1,0 +1,59 @@
+name: Build Freedom AI Trader APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    name: Build Android Release APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Extract source ZIP if needed
+        shell: bash
+        run: |
+          set -e
+          if [ ! -f package.json ]; then
+            ZIP_FILE="Freedom_AI_Trader_COMPLETE.zip"
+            if [ ! -f "$ZIP_FILE" ]; then
+              echo "ERROR: package.json missing at repository root and source ZIP not found."
+              find . -maxdepth 3 -type f | sort | head -100
+              exit 1
+            fi
+            unzip -oq "$ZIP_FILE" -d .
+          fi
+      - name: Verify required project files
+        run: |
+          test -f package.json
+          test -f app.json
+          test -f App.tsx
+          test -f src/market.ts
+          test -f src/signals.ts
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Generate Android project
+        run: npx expo prebuild --platform android --non-interactive
+      - name: Build release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: freedom-ai-trader-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
