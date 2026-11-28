@@ -1,3 +1,4 @@
+
 name: Build Freedom AI Trader APK
 
 on:
@@ -5,6 +6,9 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -24,7 +28,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
 
       - name: Verify project files
         run: |
@@ -36,10 +40,10 @@ jobs:
           test -f src/storage.ts
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
 
       - name: Generate Android project
-        run: npx expo prebuild --platform android
+        run: npx expo prebuild --platform android --non-interactive
 
       - name: Build release APK
         run: |
@@ -53,4 +57,4 @@ jobs:
           name: Freedom-AI-Trader-APK
           path: android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
-          
+          retention-days: 14
